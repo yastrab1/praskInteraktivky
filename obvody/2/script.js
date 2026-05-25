@@ -1,3 +1,6 @@
+// Base URL for fetching resources (works regardless of trailing slash in URL)
+var SCRIPT_BASE = document.currentScript.src.replace(/[^/]*$/, '');
+
 // Limits of how many things we can have
 var MAX_DEVICES = 1024;
 var MAX_WIRES = MAX_DEVICES * 2;
@@ -1033,7 +1036,7 @@ saveButton.addEventListener("click", function () {
 
 document.getElementById("export-for-veduci").addEventListener("click", async function () {
 	if (!manifest) {
-		var resp = await fetch("testingManifest.json");
+		var resp = await fetch(SCRIPT_BASE + "testingManifest.json");
 		manifest = await resp.json();
 	}
 	var commands = [];
@@ -1208,7 +1211,7 @@ function customTestHodiny() {
 
 async function loadExercise(name) {
 	if (!manifest) {
-		var resp = await fetch("testingManifest.json");
+		var resp = await fetch(SCRIPT_BASE + "testingManifest.json");
 		manifest = await resp.json();
 	}
 	var ex = manifest[name];
@@ -1224,7 +1227,7 @@ async function loadExercise(name) {
 	if (saved) {
 		loadFromString(saved);
 	} else if (ex.jsonFile) {
-		var response = await fetch(ex.jsonFile);
+		var response = await fetch(SCRIPT_BASE + ex.jsonFile);
 		loadFromString(await response.text());
 	}
 
@@ -1272,7 +1275,7 @@ async function loadExercise(name) {
 
 async function markPreviouslyCompleted(){
 	if (!manifest) {
-		var resp = await fetch("testingManifest.json");
+		var resp = await fetch(SCRIPT_BASE + "testingManifest.json");
 		manifest = await resp.json();
 	}
 	for (key in manifest){
