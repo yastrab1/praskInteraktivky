@@ -22,5 +22,11 @@
     "title": "Hodiny",
     "jsonFile": "hodiny.json",
     "customTestId": "hodiny"
+  },
+  "playground2": {
+    "title": "Playground 2",
+    "jsonFile": "playground2.json",
+    "testInputCount": 0,
+    "testTimeLimit": 0
   }
 }
