@@ -42,7 +42,8 @@ var GATE_LABELS = [null, null, null, "nie", "alebo", "a", null];
 var canvasWidth = 600;
 var canvasHeight = 600;
 
-var GAME_STORAGE_KEY = "gameData";
+var STORAGE_PREFIX = "k2_";
+var GAME_STORAGE_KEY = STORAGE_PREFIX + "gameData";
 var currentExerciseName = null;
 var manifest = null;
 
@@ -1042,9 +1043,9 @@ document.getElementById("export-for-veduci").addEventListener("click", async fun
 		if (saved) {
 			commands.push("localStorage.setItem(" + JSON.stringify(storageKey) + ", " + JSON.stringify(saved) + ");");
 		}
-		var solved = localStorage.getItem(key);
+		var solved = localStorage.getItem(STORAGE_PREFIX + key);
 		if (solved) {
-			commands.push("localStorage.setItem(" + JSON.stringify(key) + ", " + JSON.stringify(solved) + ");");
+			commands.push("localStorage.setItem(" + JSON.stringify(STORAGE_PREFIX + key) + ", " + JSON.stringify(solved) + ");");
 		}
 	}
 	if (commands.length === 0) {
@@ -1253,7 +1254,7 @@ async function loadExercise(name) {
 			if (result){ 
 				alert("Správne!");
 				displayConfetti();
-				localStorage.setItem(name, "solved");
+				localStorage.setItem(STORAGE_PREFIX + name, "solved");
 				document.getElementById(name).classList.add("finished");
 			}
 			else alert("Nesprávne.");
@@ -1275,7 +1276,7 @@ async function markPreviouslyCompleted(){
 		manifest = await resp.json();
 	}
 	for (key in manifest){
-		if (localStorage.getItem(key) === "solved") {
+		if (localStorage.getItem(STORAGE_PREFIX + key) === "solved") {
 			var elem = document.getElementById(key)
 			if (elem) elem.classList.add("finished");
 		}

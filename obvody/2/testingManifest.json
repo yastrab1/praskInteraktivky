@@ -1,0 +1,26 @@
+{
+  "tutorial2": {
+    "title": "Tutoriál 2",
+    "jsonFile": "tutorial2.json"
+  },
+  "zapnutie": {
+    "title": "Zapnutie",
+    "jsonFile": "zapnutie.json",
+    "customTestId": "zapnutie"
+  },
+  "set-reset": {
+    "title": "Set/reset",
+    "jsonFile": "set-reset.json",
+    "customTestId": "set-reset"
+  },
+  "prepinac": {
+    "title": "Prepínač",
+    "jsonFile": "prepinac.json",
+    "customTestId": "prepinac"
+  },
+  "hodiny": {
+    "title": "Hodiny",
+    "jsonFile": "hodiny.json",
+    "customTestId": "hodiny"
+  }
+}
