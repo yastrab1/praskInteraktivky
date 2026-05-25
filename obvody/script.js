@@ -13,10 +13,11 @@ var DEVICE_KIND_EXTENSION = 2;
 var DEVICE_KIND_NOT_GATE = 3;
 var DEVICE_KIND_OR_GATE = 4;
 var DEVICE_KIND_AND_GATE = 5;
+var DEVICE_KIND_BUTTON = 6;
 
 // Constants different for each device kind
-var DEVICE_INPUT_COUNT = [0, 1, 1, 1, 2, 2];
-var DEVICE_OUTPUT_COUNT = [1, 0, 1, 1, 1, 1];
+var DEVICE_INPUT_COUNT = [0, 1, 1, 1, 2, 2, 0];
+var DEVICE_OUTPUT_COUNT = [1, 0, 1, 1, 1, 1, 1];
 
 // Visual constants
 var GRID_CELL_SIZE = 36;
@@ -36,7 +37,7 @@ var COLOR_ON = "lightyellow";
 var SWITCH_TOGGLE_WIDTH = 34;
 var SWITCH_TOGGLE_HEIGHT = 20; // also used for light
 
-var GATE_LABELS = [null, null, null, "nie", "alebo", "a"];
+var GATE_LABELS = [null, null, null, "nie", "alebo", "a", null];
 
 var canvasWidth = 600;
 var canvasHeight = 600;
@@ -268,6 +269,10 @@ function simulateStep() {
 			case DEVICE_KIND_AND_GATE:
 				gameState.nodeValues[3 * i + 2] = gameState.nodeValues[3 * i] && gameState.nodeValues[3 * i + 1];
 				break;
+			case DEVICE_KIND_BUTTON:
+				gameState.nodeValues[3 * i + 2] = gameState.nodeValues[3 * i];
+				gameState.nodeValues[3 * i] = false;
+				break;
 		}
 	}
 	for (var i = 0; i < MAX_WIRES; ++i) {
@@ -378,7 +383,7 @@ function drawDevice(index, dx, dy, isSelected) {
 	var screenY = gridToScreenY(position) + dy;
 
 	drawingContext.fillStyle = "lightgray";
-	drawingContext.strokeStyle = isSelected ? "black" : "darkgray";
+	drawingContext.strokeStyle = isSelected ? "white" : "darkgray";
 	drawingContext.lineWidth = DEVICE_BORDER_WIDTH;
 	drawRoundedRect(
 		screenX - GRID_CELL_SIZE / 2,
@@ -415,6 +420,16 @@ function drawDevice(index, dx, dy, isSelected) {
 			drawRoundedRect(
 				screenX - SWITCH_TOGGLE_HEIGHT / 2 + (SWITCH_TOGGLE_WIDTH - SWITCH_TOGGLE_HEIGHT) * gameState.nodeValues[3 * index + 2],
 				screenY - SWITCH_TOGGLE_HEIGHT / 2,
+				SWITCH_TOGGLE_HEIGHT, SWITCH_TOGGLE_HEIGHT, SWITCH_TOGGLE_HEIGHT / 2
+			);
+			drawingContext.fill();
+			drawingContext.stroke();
+			break;
+		case DEVICE_KIND_BUTTON:
+			drawingContext.fillStyle = "darkgray";
+			drawingContext.strokeStyle = "gray";
+			drawRoundedRect(
+				screenX - SWITCH_TOGGLE_HEIGHT / 2, screenY - SWITCH_TOGGLE_HEIGHT / 2,
 				SWITCH_TOGGLE_HEIGHT, SWITCH_TOGGLE_HEIGHT, SWITCH_TOGGLE_HEIGHT / 2
 			);
 			drawingContext.fill();
@@ -545,7 +560,7 @@ function draw() {
 		drawingContext.fill();
 	}
 
-	// Draw gameState.wires
+	// Draw wires
 	for (var i = 0; i < gameState.wireCount; ++i) {
 		var wire = gameState.wireStack[i];
 		if (wire === Math.floor(draggedWireEnd / 2)) continue;
@@ -559,7 +574,7 @@ function draw() {
 
 	// Draw the dragged device
 	if (draggedDevice !== -1) {
-		drawDevice(draggedDevice, dragCurrentX - dragOriginX, dragCurrentY - dragOriginY, true);
+		drawDevice(draggedDevice, (dragCurrentX - dragOriginX) / gameState.viewScale, (dragCurrentY - dragOriginY) / gameState.viewScale, true);
 
 		// Draw gameState.wires connected to it
 		for (var i = 0; i < gameState.wireCount; ++i) {
@@ -570,12 +585,12 @@ function draw() {
 			var wireEndDevice = Math.floor(gameState.wires[2 * wire + 1] / 3);
 			if (wireStartDevice !== draggedDevice && wireEndDevice !== draggedDevice) continue;
 			if (wireStartDevice === draggedDevice) {
-				dx0 = dragCurrentX - dragOriginX;
-				dy0 = dragCurrentY - dragOriginY;
+				dx0 = (dragCurrentX - dragOriginX) / gameState.viewScale;
+				dy0 = (dragCurrentY - dragOriginY) / gameState.viewScale;
 			}
 			if (wireEndDevice === draggedDevice) {
-				dx1 = dragCurrentX - dragOriginX;
-				dy1 = dragCurrentY - dragOriginY;
+				dx1 = (dragCurrentX - dragOriginX) / gameState.viewScale;
+				dy1 = (dragCurrentY - dragOriginY) / gameState.viewScale;
 			}
 
 			drawWire(wire, dx0, dy0, dx1, dy1, 0);
@@ -590,8 +605,8 @@ function draw() {
 		var dy = dragCurrentY - dragOriginY;
 		drawWire(
 			draggedWire,
-			(1 - isWireEnd) * dx, (1 - isWireEnd) * dy,
-			isWireEnd * dx/gameState.viewScale, isWireEnd * dy/gameState.viewScale, true
+			(1 - isWireEnd) * dx / gameState.viewScale, (1 - isWireEnd) * dy / gameState.viewScale,
+			isWireEnd * dx / gameState.viewScale, isWireEnd * dy / gameState.viewScale, true
 		);
 	}
 }
@@ -738,11 +753,15 @@ if (PointerEvent) {
 		dragCurrentX = dragOriginX;
 		dragCurrentY = dragOriginY;
 
-		// If not editing, we check if we're tapping a light switch
+		// If not editing, we check if we're tapping a light switch or a button
 		if (!editing) {
 			for (var i = 0; i < MAX_DEVICES; ++i) {
-				if (gameState.deviceKinds[i] === DEVICE_KIND_SWITCH && gameState.devicePositions[i] === selectedPosition) {
+				if (gameState.devicePositions[i] !== selectedPosition) continue;
+				if (gameState.deviceKinds[i] === DEVICE_KIND_SWITCH) {
 					gameState.nodeValues[3 * i + 2] = !gameState.nodeValues[3 * i + 2];
+				}
+				if (gameState.deviceKinds[i] === DEVICE_KIND_BUTTON) {
+					gameState.nodeValues[3 * i] = true;
 				}
 			}
 		}
@@ -820,8 +839,8 @@ if (PointerEvent) {
 		if (draggedDevice !== -1) {
 			var originalDevicePosition = gameState.devicePositions[draggedDevice];
 			var selectedPosition = screenToGridPositionUntransformed(
-				gridToScreenX(originalDevicePosition) + event.offsetX - dragOriginX,
-				gridToScreenY(originalDevicePosition) + event.offsetY - dragOriginY
+				gridToScreenX(originalDevicePosition) + (event.offsetX - dragOriginX) / gameState.viewScale,
+				gridToScreenY(originalDevicePosition) + (event.offsetY - dragOriginY) / gameState.viewScale
 			);
 			// see if the device intersects anything
 			var deviceKind = gameState.deviceKinds[draggedDevice];
@@ -1002,14 +1021,14 @@ saveButton.addEventListener("click", function () {
 	saveGameStateToStorage();
 })
 
-document.getElementById("export-json").addEventListener("click", function () {
+/*document.getElementById("export-json").addEventListener("click", function () {
 	var json = JSON.stringify(gameState, null, 2);
 	navigator.clipboard.writeText(json).then(function () {
 		alert("JSON skopírovaný do schránky!");
 	}, function () {
 		prompt("Skopíruj JSON:", json);
 	});
-});
+});*/
 
 document.getElementById("export-for-veduci").addEventListener("click", async function () {
 	if (!manifest) {
@@ -1065,6 +1084,126 @@ if (zoomResetButton) {
 	});
 }
 
+function customTestZapnutie() {
+	for (var i = 0; i < 16; i++) {
+		simulateStep();
+		if (gameState.nodeValues[3]) return false;
+	}
+	gameState.nodeValues[0] = true;
+	for (var i = 0; i < 8; i++) simulateStep();
+	for (var i = 0; i < 16; i++) {
+		simulateStep();
+		if (!gameState.nodeValues[3]) return false;
+	}
+	return true;
+}
+
+function customTestSetReset() {
+	for (var i = 0; i < 13; i++) {
+		simulateStep();
+		if (gameState.nodeValues[6]) return false;
+	}
+	gameState.nodeValues[0] = true;
+	for (var i = 0; i < 8; i++) simulateStep();
+	for (var i = 0; i < 18; i++) {
+		simulateStep();
+		if (!gameState.nodeValues[6]) return false;
+	}
+	gameState.nodeValues[3] = true;
+	for (var i = 0; i < 8; i++) simulateStep();
+	for (var i = 0; i < 15; i++) {
+		simulateStep();
+		if (gameState.nodeValues[6]) return false;
+	}
+	gameState.nodeValues[0] = true;
+	for (var i = 0; i < 8; i++) simulateStep();
+	for (var i = 0; i < 14; i++) {
+		simulateStep();
+		if (!gameState.nodeValues[6]) return false;
+	}
+	gameState.nodeValues[3] = true;
+	for (var i = 0; i < 8; i++) simulateStep();
+	for (var i = 0; i < 16; i++) {
+		simulateStep();
+		if (gameState.nodeValues[6]) return false;
+	}
+	gameState.nodeValues[3] = true;
+	for (var i = 0; i < 8; i++) simulateStep();
+	for (var i = 0; i < 4; i++) {
+		simulateStep();
+		if (gameState.nodeValues[6]) return false;
+	}
+	gameState.nodeValues[0] = true;
+	for (var i = 0; i < 8; i++) simulateStep();
+	for (var i = 0; i < 20; i++) {
+		simulateStep();
+		if (!gameState.nodeValues[6]) return false;
+	}
+	gameState.nodeValues[0] = true;
+	for (var i = 0; i < 8; i++) simulateStep();
+	for (var i = 0; i < 7; i++) {
+		simulateStep();
+		if (!gameState.nodeValues[6]) return false;
+	}
+	return true;
+}
+
+function customTestPrepinac() {
+	for (var i = 0; i < 13; i++) {
+		simulateStep();
+		if (gameState.nodeValues[3]) return false;
+	}
+	gameState.nodeValues[0] = true;
+	for (var i = 0; i < 8; i++) simulateStep();
+	for (var i = 0; i < 18; i++) {
+		simulateStep();
+		if (!gameState.nodeValues[3]) return false;
+	}
+	gameState.nodeValues[0] = true;
+	for (var i = 0; i < 8; i++) simulateStep();
+	for (var i = 0; i < 15; i++) {
+		simulateStep();
+		if (gameState.nodeValues[3]) return false;
+	}
+	gameState.nodeValues[0] = true;
+	for (var i = 0; i < 8; i++) simulateStep();
+	for (var i = 0; i < 14; i++) {
+		simulateStep();
+		if (!gameState.nodeValues[3]) return false;
+	}
+	gameState.nodeValues[0] = true;
+	for (var i = 0; i < 8; i++) simulateStep();
+	for (var i = 0; i < 16; i++) {
+		simulateStep();
+		if (gameState.nodeValues[3]) return false;
+	}
+	gameState.nodeValues[0] = true;
+	for (var i = 0; i < 8; i++) simulateStep();
+	for (var i = 0; i < 20; i++) {
+		simulateStep();
+		if (!gameState.nodeValues[3]) return false;
+	}
+	return true;
+}
+
+function customTestHodiny() {
+	gameState.nodeValues[3] = true;
+	for (var i = 0; i < 8; i++) {
+		if (gameState.nodeValues[0]) break;
+		simulateStep();
+	}
+	for (var i = 0; i < 13; i++) {
+		if (!gameState.nodeValues[0]) return false;
+		simulateStep();
+		for (var j = 0; j < 7; j++) {
+			console.log("step", j);
+			if (gameState.nodeValues[0]) return false;
+			simulateStep();
+		}
+	}
+	return true;
+}
+
 
 async function loadExercise(name) {
 	if (!manifest) {
@@ -1094,11 +1233,23 @@ async function loadExercise(name) {
 
 	// Bind test button
 	var testBtn = document.getElementById("test-circuit");
-	if (ex.solutionBody) {
+	if (ex.solutionBody || ex.customTestId) {
 		testBtn.hidden = false;
 		testBtn.onclick = function () {
-			var solution = new Function("x", ex.solutionBody);
-			let result = test(ex.testInputCount, ex.testTimeLimit, solution) 
+			var result;
+			if (ex.customTestId) {
+				fillArray(gameState.nodeValues, 0);
+				switch (ex.customTestId) {
+					case "zapnutie": result = customTestZapnutie(); break;
+					case "set-reset": result = customTestSetReset(); break;
+					case "prepinac": result = customTestPrepinac(); break;
+					case "hodiny": result = customTestHodiny(); break;
+				}
+			}
+			else {
+				var solution = new Function("x", ex.solutionBody);
+				result = test(ex.testInputCount, ex.testTimeLimit, solution) 
+			}
 			if (result){ 
 				alert("Správne!");
 				displayConfetti();
@@ -1125,7 +1276,8 @@ async function markPreviouslyCompleted(){
 	}
 	for (key in manifest){
 		if (localStorage.getItem(key) === "solved") {
-			document.getElementById(key).classList.add("finished");
+			var elem = document.getElementById(key)
+			if (elem) elem.classList.add("finished");
 		}
 	}
 }

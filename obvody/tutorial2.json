@@ -1,0 +1,12 @@
+{
+  "devicePositionsSparse": {
+  },
+  "deviceKindsSparse": {
+  },
+  "viewOffsetX": 18083,
+  "viewOffsetY": 18132,
+  "builtinCount": 0,
+  "builtinLabelsSparse": {
+  },
+  "zadanie": "V druhom kole tu je oproti minulému jedna zmena: okrem vypínačov existujú aj tlačítka. Vypínače fungujú tak, že keď zapneš vypínač, tak ostane zapnutý, až kým ho nevypneš. Na rozdiel od vypínačov, keď stlačíš tlačítko, tak sa zapne, ale hneď potom sa zase vypne.\n\nDobre, ale čo presne znamená \"hneď potom\"? Už aj v minulom kole to fungovalo tak, že keď sa má v obvode niečo diať, nedeje sa to všetko naraz, ale postupne po krokoch. Čas, za ktorý ubehne jeden krok, môžeme nazvať _okamih_. Keď nejaká súčiastka v jednom okamihu má nejaký vstup, tak až v ďalšom okamihu podľa toho upraví svoj výstup. Teda napríklad ak mám bránu \"nie\", tak keď je vstup vypnutý, tak výstup bude zapnutý, a keď sa v nejakom kroku zapne vstup, tak až v ďalšom kroku sa vypne výstup. Takto teda môžeme robiť obvody, ktoré niečo robia aj v čase.\n\nPokiaľ nie je povedané inak, tak časový limit na to, kedy treba zareagovať na vstup, je 8 okamihov. Napríklad ak chceme, aby sa po stlačení tlačítka zapla žiarovka, tak stačí, aby sa zapla 8 okamihov po stlačení tlačítka."
+}

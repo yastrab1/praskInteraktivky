@@ -1,0 +1,18 @@
+{
+  "devicePositionsSparse": {
+    "0": 524804,
+    "1": 524796
+  },
+  "deviceKindsSparse": {
+    "0": 1,
+    "1": 6
+  },
+  "viewOffsetX": 18155.5,
+  "viewOffsetY": 18053,
+  "builtinCount": 2,
+  "builtinLabelsSparse": {
+    "0": "hodiny",
+    "1": "štart"
+  },
+  "zadanie": "Tlačítko má zapnúť svetlo, a odvtedy má svetlo svietiť každý ôsmy okamih.\n\nTeda po stlačení tlačítka sa najprv musí svetlo niekedy v prvých ôsmich okamihoch zapnúť, na práve jeden okamih. Potom musí byť ďalších 7 okamihov vypnuté, potom sa musí zase zapnúť na jeden okamih, a tak ďalej.\n\nChallenge navyše: nepouži pritom to tlačítko, nech sa tie hodiny pustia samé."
+}

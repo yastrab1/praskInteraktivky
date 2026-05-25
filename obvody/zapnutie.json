@@ -1,0 +1,18 @@
+{
+  "devicePositionsSparse": {
+    "0": 524796,
+    "1": 524804
+  },
+  "deviceKindsSparse": {
+    "0": 6,
+    "1": 1
+  },
+  "viewOffsetX": 18155.5,
+  "viewOffsetY": 18053,
+  "builtinCount": 2,
+  "builtinLabelsSparse": {
+    "0": "zapnúť",
+    "1": "svetlo"
+  },
+  "zadanie": "Na začiatku má byž svetlo vypnuté. Keď stlačíš tlačítko, svetlo sa má zapnúť a potom už ostať zapnuté."
+}
